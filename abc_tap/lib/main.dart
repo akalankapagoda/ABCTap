@@ -4,10 +4,12 @@
 
 import 'dart:developer';
 
+import 'package:ads/ads.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:pimp_my_button/pimp_my_button.dart';
+import 'package:abctap/AppAds.dart';
 
 void main() => runApp(MyApp());
 
@@ -22,6 +24,7 @@ class MyApp extends StatelessWidget { // Probably fucked up here with stateless 
 }
 
 class LettersState extends State<Letters> {
+  final _ads = AppAds.init();
   final _suggestions = [
     "A",
     "B",
@@ -85,10 +88,15 @@ class LettersState extends State<Letters> {
     return InkWell(
       child: _buildTile(),
       onLongPress: () {
+        AppAds.showBanner();
         changeLetter(tapPosition);
       },
       onTapDown: (TapDownDetails details) {
+        AppAds.showBanner();
         changeLetter(details.localPosition);
+      },
+      onDoubleTap: () {
+        AppAds.hideBanner();
       },
     );
   }

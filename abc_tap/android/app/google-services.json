@@ -1,0 +1,41 @@
+{
+  "project_info": {
+    "project_number": "404380226527",
+    "firebase_url": "https://abc-tap.firebaseio.com",
+    "project_id": "abc-tap",
+    "storage_bucket": "abc-tap.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:404380226527:android:b97359adcb62990b1d6a6a",
+        "android_client_info": {
+          "package_name": "com.dagger.abctap"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "404380226527-ak0ue1gv65ivivllfgpuh0iousjuem2t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD63M2c_IfAgzXE2etIydYERjz5RHfgKW4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "404380226527-ak0ue1gv65ivivllfgpuh0iousjuem2t.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      },
+      "admob_app_id": "ca-app-pub-7138758578654885~6020628347"
+    }
+  ],
+  "configuration_version": "1"
+}
