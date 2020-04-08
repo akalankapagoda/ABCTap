@@ -4,24 +4,25 @@
 
 import 'dart:developer';
 
-import 'package:ads/ads.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/rendering.dart';
 import 'package:pimp_my_button/pimp_my_button.dart';
 import 'package:abctap/AppAds.dart';
+import 'package:abctap/bubbles.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(Letters());
 
-class MyApp extends StatelessWidget { // Probably fucked up here with stateless widget, but it works
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'ABC Tap',
-      home: Letters(),
-    );
-  }
-}
+//class MyApp extends StatelessWidget { // Probably fucked up here with stateless widget, but it works
+//  @override
+//  Widget build(BuildContext context) {
+//    return MaterialApp(
+//      title: 'ABC Tap',
+//      home: Letters(),
+//    );
+//  }
+//}
 
 class LettersState extends State<Letters> {
   final _ads = AppAds.init();
@@ -88,15 +89,15 @@ class LettersState extends State<Letters> {
     return InkWell(
       child: _buildTile(),
       onLongPress: () {
-        AppAds.showBanner();
+//        AppAds.showBanner();
         changeLetter(tapPosition);
       },
       onTapDown: (TapDownDetails details) {
-        AppAds.showBanner();
+//        AppAds.showBanner();
         changeLetter(details.localPosition);
       },
       onDoubleTap: () {
-        AppAds.hideBanner();
+//        AppAds.hideBanner();
       },
     );
   }
@@ -147,22 +148,11 @@ class LettersState extends State<Letters> {
       ),
       child: Stack(
         children: <Widget>[
-//          Center(
-//              child: Text(
-//            _suggestions[letterIndex],
-//            style: activeTextStyle,
-//          )),
           Positioned(
             child: PimpedButton(
               particle: DemoParticle(),
               pimpedWidgetBuilder: (context, controller) {
                 controller.forward(from: 0.0);
-//                return FloatingActionButton(
-//                  mini: true,
-//                  elevation: 0,
-//                  backgroundColor: Colors.transparent,
-//                  onPressed: () {},
-//                );
               },
             ),
             left: tapPosition.dx,
@@ -210,6 +200,19 @@ class LettersState extends State<Letters> {
             left: tapPosition.dx - 75,
             top: tapPosition.dy - 75,
           ),
+          Positioned(
+            child: Container(
+              height: 100,
+              width: 100,
+              child: Bubbles(
+                colors: _colors,
+                x: tapPosition.dx,
+                y: tapPosition.dy,
+              ),
+            ),
+            left: tapPosition.dx,
+            top: tapPosition.dy,
+          )
         ],
       ),
     ));
@@ -222,8 +225,11 @@ class LettersState extends State<Letters> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _buildBody(),
+    return MaterialApp(
+      title: 'ABC Tap',
+      home: Scaffold(
+        body: _buildBody(),
+      ),
     );
   }
 }
