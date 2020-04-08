@@ -7,16 +7,14 @@ class Bubbles extends StatefulWidget {
   final List<Color> colors;
   final double x;
   final double y;
+  final BubbleController bubbleController;
 
   const Bubbles({
     this.colors,
     this.x,
-    this.y
+    this.y,
+    this.bubbleController
   });
-
-  void repeatAnimation() {
-
-  }
 
   @override
   State<StatefulWidget> createState() {
@@ -27,24 +25,25 @@ class Bubbles extends StatefulWidget {
 class _BubblesState extends State<Bubbles> with SingleTickerProviderStateMixin {
 
   AnimationController _controller;
-  List<Bubble> bubbles;
-  final int numberOfBubbles = 50;
-  final double maxBubbleSize = 10.0;
+  List<Bubble> bubbles = List();
+  final int numberOfBubbles = 100;
+  final double maxBubbleSize = 25.0;
 
-  void repeatAnimation() {
-
+  void _handleChange() {
+    debugPrint('Bubble Controler x : ' + widget.bubbleController.x.toString() + " Y : " + widget.bubbleController.y.toString());
+    if (widget.bubbleController.state == BubbleControllerState.playing) {
+      startAnimation(widget.bubbleController.x, widget.bubbleController.y);
+    } else if (widget.bubbleController.state == BubbleControllerState.stopped) {
+      stopAnimation();
+    }
+    setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
-    // Initialize bubbles
-    bubbles = List();
-    int i = numberOfBubbles;
-    while (i > 0) {
-      bubbles.add(Bubble(widget.colors[i % widget.colors.length], maxBubbleSize, widget.x, widget.y));
-      i--;
-    }
+
+    widget.bubbleController.addListener(_handleChange);
 
     // Init animation controller
     _controller = new AnimationController(
@@ -52,7 +51,25 @@ class _BubblesState extends State<Bubbles> with SingleTickerProviderStateMixin {
     _controller.addListener(() {
       updateBubblePosition();
     });
-    _controller.forward();
+
+//    startAnimation(0, 0);
+  }
+
+  void startAnimation(x, y) {
+     debugPrint('START animation x : ' + x.toString() + " Y : " + y.toString());
+    bubbles = List();
+    int i = numberOfBubbles;
+    while (i > 0) {
+      bubbles.add(Bubble(widget.colors[i % widget.colors.length], maxBubbleSize, x, y));
+      i--;
+    }
+     setState(() {});
+    _controller.forward(from: 0);
+  }
+
+  void stopAnimation() {
+    // debugPrint('STOP animation');
+    _controller.stop();
   }
 
   @override
@@ -108,10 +125,12 @@ class Bubble {
   Bubble(Color colour, double maxBubbleSize, double x, double y) {
     this.colour = colour.withOpacity(Random().nextDouble());
     this.direction = Random().nextDouble() * 360;
-    this.speed = 1;
+    this.speed = 4;
     this.radius = Random().nextDouble() * maxBubbleSize;
     this.x = x;
     this.y = y;
+
+    debugPrint("X is " + this.x.toString() + " y is " + this.y.toString());
   }
 
   draw(Canvas canvas, Size canvasSize) {
@@ -120,15 +139,16 @@ class Bubble {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.fill;
 
-    assignRandomPositionIfUninitialized(canvasSize);
+//    assignRandomPositionIfUninitialized(canvasSize);
 //
     randomlyChangeDirectionIfEdgeReached(canvasSize);
-
+//    debugPrint("X is " + this.x.toString() + " y is " + this.y.toString());
     canvas.drawCircle(Offset(x, y), radius, paint);
   }
 
   void assignRandomPositionIfUninitialized(Size canvasSize) {
     if (x == null) {
+       debugPrint('Assigning random position');
       this.x = Random().nextDouble() * canvasSize.width;
     }
 
@@ -152,4 +172,33 @@ class Bubble {
       direction = Random().nextDouble() * 360;
     }
   }
+}
+
+class BubbleController extends ChangeNotifier {
+
+  BubbleControllerState _state = BubbleControllerState.playing;
+
+  double x = 0;
+  double y = 0;
+
+  BubbleControllerState get state => _state;
+
+  void play(x, y) {
+    debugPrint('Play bubble controler x : ' + x.toString() + " Y : " + y.toString());
+    this.x = x;
+    this.y = y;
+    _state = BubbleControllerState.playing;
+
+    notifyListeners();
+  }
+
+  void stop() {
+    _state = BubbleControllerState.stopped;
+    notifyListeners();
+  }
+}
+
+enum BubbleControllerState {
+  playing,
+  stopped,
 }

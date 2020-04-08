@@ -12,17 +12,17 @@ import 'package:pimp_my_button/pimp_my_button.dart';
 import 'package:abctap/AppAds.dart';
 import 'package:abctap/bubbles.dart';
 
-void main() => runApp(Letters());
+void main() => runApp(ABCTap());
 
-//class MyApp extends StatelessWidget { // Probably fucked up here with stateless widget, but it works
-//  @override
-//  Widget build(BuildContext context) {
-//    return MaterialApp(
-//      title: 'ABC Tap',
-//      home: Letters(),
-//    );
-//  }
-//}
+class ABCTap extends StatelessWidget { // Probably fucked up here with stateless widget, but it works
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'ABC Tap',
+      home: Letters(),
+    );
+  }
+}
 
 class LettersState extends State<Letters> {
   final _ads = AppAds.init();
@@ -84,8 +84,15 @@ class LettersState extends State<Letters> {
   int colorIndex = 0;
   int soundIndex = 0;
   Offset tapPosition = Offset.zero;
+  BubbleController bubbleController = new BubbleController();
+
+  double screenWidth;
+  double screenHeight;
 
   Widget _buildBody() {
+    this.screenHeight = MediaQuery.of(context).size.height;
+    this.screenWidth =  MediaQuery.of(context).size.width;
+
     return InkWell(
       child: _buildTile(),
       onLongPress: () {
@@ -103,6 +110,7 @@ class LettersState extends State<Letters> {
   }
 
   void changeLetter(Offset localPosition) {
+    bubbleController.play(tapPosition.dx, tapPosition.dy);
     if (++letterIndex > 25) {
       letterIndex = 0;
     }
@@ -200,19 +208,16 @@ class LettersState extends State<Letters> {
             left: tapPosition.dx - 75,
             top: tapPosition.dy - 75,
           ),
-          Positioned(
-            child: Container(
-              height: 100,
-              width: 100,
+          Container(
+              height: screenHeight,
+              width: screenWidth,
               child: Bubbles(
                 colors: _colors,
                 x: tapPosition.dx,
                 y: tapPosition.dy,
+                bubbleController: bubbleController,
               ),
             ),
-            left: tapPosition.dx,
-            top: tapPosition.dy,
-          )
         ],
       ),
     ));
