@@ -11,10 +11,12 @@ import 'package:flutter/rendering.dart';
 import 'package:pimp_my_button/pimp_my_button.dart';
 import 'package:abctap/AppAds.dart';
 import 'package:abctap/bubbles.dart';
+import 'package:confetti/confetti.dart';
 
 void main() => runApp(ABCTap());
 
-class ABCTap extends StatelessWidget { // Probably fucked up here with stateless widget, but it works
+class ABCTap extends StatelessWidget {
+  // Probably fucked up here with stateless widget, but it works
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -76,22 +78,19 @@ class LettersState extends State<Letters> {
     "audio/Video-Game-Secret-Sound-A2.mp3",
     "audio/Video-Game-Secret-Sound-C1.mp3"
   ];
-  // TODO: Find out screen size and decide few levels of font sizes
-  final _biggerFont = const TextStyle(
-      fontSize: 500.0);
-  final _mwFont = const TextStyle(fontSize: 450);
   int letterIndex = 0;
   int colorIndex = 0;
   int soundIndex = 0;
   Offset tapPosition = Offset.zero;
-  BubbleController bubbleController = new BubbleController();
+  ConfettiController confettiController = new ConfettiController(duration: Duration(milliseconds: 500));
+  bool bubblesVisible = false;
 
   double screenWidth;
   double screenHeight;
 
   Widget _buildBody() {
     this.screenHeight = MediaQuery.of(context).size.height;
-    this.screenWidth =  MediaQuery.of(context).size.width;
+    this.screenWidth = MediaQuery.of(context).size.width;
 
     return InkWell(
       child: _buildTile(),
@@ -110,7 +109,7 @@ class LettersState extends State<Letters> {
   }
 
   void changeLetter(Offset localPosition) {
-    bubbleController.play(tapPosition.dx, tapPosition.dy);
+    confettiController.play();
     if (++letterIndex > 25) {
       letterIndex = 0;
     }
@@ -131,14 +130,6 @@ class LettersState extends State<Letters> {
   Widget _buildTile() {
     playSound(_sounds[soundIndex]);
 
-    TextStyle activeTextStyle;
-
-    if (_suggestions[letterIndex] == 'M' || _suggestions[letterIndex] == 'W') {
-      activeTextStyle = _mwFont;
-    } else {
-      activeTextStyle = _biggerFont;
-    }
-
     String imageURL = "assets/alphabet/" + _suggestions[letterIndex] + ".png";
     return GridTile(
         child: Container(
@@ -156,6 +147,19 @@ class LettersState extends State<Letters> {
       ),
       child: Stack(
         children: <Widget>[
+//          Positioned(
+//              left: 25,
+//              top: 25,
+//              child: FloatingActionButton(
+//                mini: true,
+//                backgroundColor: _colors[colorIndex],
+//                onPressed: toggleBubbles,
+//                child: Text(
+//                  "Bubbles",
+//                  style: TextStyle(fontSize: 8),
+//                ),
+//              )
+//          ),
           Positioned(
             child: PimpedButton(
               particle: DemoParticle(),
@@ -185,10 +189,7 @@ class LettersState extends State<Letters> {
               particle: DemoParticle(),
               pimpedWidgetBuilder: (context, controller) {
                 controller.forward(from: 0.0);
-                return Container(
-                  width: 100,
-                  height: 100
-                );
+                return Container(width: 100, height: 100);
               },
             ),
             left: tapPosition.dx - 50,
@@ -199,33 +200,65 @@ class LettersState extends State<Letters> {
               particle: DemoParticle(),
               pimpedWidgetBuilder: (context, controller) {
                 controller.forward(from: 0.0);
-                return Container(
-                    width: 150,
-                    height: 150
-                );
+                return Container(width: 150, height: 150);
               },
             ),
             left: tapPosition.dx - 75,
             top: tapPosition.dy - 75,
           ),
-          Container(
-              height: screenHeight,
-              width: screenWidth,
-              child: Bubbles(
-                colors: _colors,
-                x: tapPosition.dx,
-                y: tapPosition.dy,
-                bubbleController: bubbleController,
-              ),
+          Positioned(
+            child: Container(
+              child :ConfettiWidget(
+              confettiController: confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              shouldLoop: false,
+              numberOfParticles: 10,
+              emissionFrequency: 0.5,
+              gravity: 0.05,
+              colors: [
+                Colors.green,
+                Colors.blue,
+                Colors.pink,
+                Colors.orange,
+                Colors.purple
+              ], // manually specify the colors to be used
+            )
             ),
+            left: tapPosition.dx,
+            top: tapPosition.dy,
+          ),
+          getBubbles()
         ],
       ),
     ));
   }
 
+  Widget getBubbles() {
+    if (bubblesVisible) {
+      return Bubbles(
+          colors: _colors
+      );
+    } else {
+      return Container();
+    }
+  }
+
+  void toggleBubbles() {
+    bubblesVisible = !bubblesVisible;
+    setState(() {});
+  }
+
   Future<AudioPlayer> playSound(String sound) async {
     AudioCache cache = new AudioCache();
     return await cache.play(sound);
+  }
+
+  Icon getFloatingButtonIcon() {
+    if (bubblesVisible) {
+      return Icon(Icons.pause);
+    } else {
+      return Icon(Icons.play_arrow);
+    }
   }
 
   @override
@@ -234,6 +267,13 @@ class LettersState extends State<Letters> {
       title: 'ABC Tap',
       home: Scaffold(
         body: _buildBody(),
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: _colors[colorIndex],
+//          mini: true,
+          onPressed: toggleBubbles,
+          child: getFloatingButtonIcon()
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       ),
     );
   }
