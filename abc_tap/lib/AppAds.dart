@@ -55,10 +55,9 @@ class AppAds {
     _appId,
     bannerUnitId: _bannerUnitId,
     keywords: <String>['baby', 'ABC', 'tap', 'alphabet', 'touch'],
-    contentUrl: 'http://www.ibm.com',
-    childDirected: false,
-    testDevices: ['Samsung_Gal  axy_SII_API_26:5554'],
+    childDirected: true,
     testing: true,
+    anchorType: AnchorType.top,
     listener: _eventListener,
   );
 

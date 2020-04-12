@@ -84,6 +84,7 @@ class LettersState extends State<Letters> {
   Offset tapPosition = Offset.zero;
   ConfettiController confettiController = new ConfettiController(duration: Duration(milliseconds: 500));
   bool bubblesVisible = false;
+  int adsCounter = 0;
 
   double screenWidth;
   double screenHeight;
@@ -92,20 +93,29 @@ class LettersState extends State<Letters> {
     this.screenHeight = MediaQuery.of(context).size.height;
     this.screenWidth = MediaQuery.of(context).size.width;
 
+    if (++adsCounter == 50) {
+      adsCounter = 0;
+      showAd();
+    }
+
     return InkWell(
       child: _buildTile(),
       onLongPress: () {
-//        AppAds.showBanner();
         changeLetter(tapPosition);
       },
       onTapDown: (TapDownDetails details) {
-//        AppAds.showBanner();
         changeLetter(details.localPosition);
-      },
-      onDoubleTap: () {
-//        AppAds.hideBanner();
-      },
+      }
     );
+  }
+
+  void showAd() {
+    AppAds.showBanner();
+
+    Future.delayed(const Duration(seconds: 15), () {
+      AppAds.hideBanner();
+
+    });
   }
 
   void changeLetter(Offset localPosition) {
