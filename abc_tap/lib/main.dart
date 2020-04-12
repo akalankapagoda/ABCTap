@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:pimp_my_button/pimp_my_button.dart';
 import 'package:abctap/AppAds.dart';
 import 'package:abctap/bubbles.dart';
@@ -15,18 +16,14 @@ import 'package:confetti/confetti.dart';
 
 void main() => runApp(ABCTap());
 
-class ABCTap extends StatelessWidget {
-  // Probably fucked up here with stateless widget, but it works
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'ABC Tap',
-      home: Letters(),
-    );
-  }
-}
+class ABCTap extends StatefulWidget {
 
-class LettersState extends State<Letters> {
+  @override
+  LettersState createState() => LettersState();
+
+  }
+
+class LettersState extends State<ABCTap> {
   final _ads = AppAds.init();
   final _suggestions = [
     "A",
@@ -86,12 +83,14 @@ class LettersState extends State<Letters> {
   bool bubblesVisible = false;
   int adsCounter = 0;
 
-  double screenWidth;
-  double screenHeight;
+
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setEnabledSystemUIOverlays([]); // Make it fullscreen
+}
 
   Widget _buildBody() {
-    this.screenHeight = MediaQuery.of(context).size.height;
-    this.screenWidth = MediaQuery.of(context).size.width;
 
     if (++adsCounter == 50) {
       adsCounter = 0;
@@ -145,9 +144,9 @@ class LettersState extends State<Letters> {
         child: Container(
       decoration: BoxDecoration(
         border: Border(
-          left: BorderSide(width: 10.0, color: Color(0xFFFF000000)),
-          right: BorderSide(width: 10.0, color: Color(0xFFFF000000)),
-          bottom: BorderSide(width: 10.0, color: Color(0xFFFF000000)),
+          left: BorderSide(width: 2.0, color: Color(0xFFFF000000)),
+          right: BorderSide(width: 2.0, color: Color(0xFFFF000000)),
+          bottom: BorderSide(width: 2.0, color: Color(0xFFFF000000)),
         ),
         color: _colors[colorIndex],
         image: DecorationImage(
@@ -157,19 +156,6 @@ class LettersState extends State<Letters> {
       ),
       child: Stack(
         children: <Widget>[
-//          Positioned(
-//              left: 25,
-//              top: 25,
-//              child: FloatingActionButton(
-//                mini: true,
-//                backgroundColor: _colors[colorIndex],
-//                onPressed: toggleBubbles,
-//                child: Text(
-//                  "Bubbles",
-//                  style: TextStyle(fontSize: 8),
-//                ),
-//              )
-//          ),
           Positioned(
             child: PimpedButton(
               particle: DemoParticle(),
@@ -277,6 +263,7 @@ class LettersState extends State<Letters> {
       title: 'ABC Tap',
       home: Scaffold(
         body: _buildBody(),
+        resizeToAvoidBottomPadding: false,
         floatingActionButton: FloatingActionButton(
           backgroundColor: _colors[colorIndex],
 //          mini: true,
@@ -287,9 +274,4 @@ class LettersState extends State<Letters> {
       ),
     );
   }
-}
-
-class Letters extends StatefulWidget {
-  @override
-  LettersState createState() => LettersState();
 }
