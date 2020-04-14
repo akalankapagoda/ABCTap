@@ -261,6 +261,7 @@ class LettersState extends State<ABCTap> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'ABC Tap',
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: _buildBody(),
         resizeToAvoidBottomPadding: false,
