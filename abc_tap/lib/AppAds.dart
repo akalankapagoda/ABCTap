@@ -8,11 +8,11 @@ class AppAds {
   static Ads _ads;
 
   static final String _appId = Platform.isAndroid
-      ? 'ca-app-pub-7138758578654885~6020628347'
-      : 'ca-app-pub-7138758578654885~6020628347';
+      ? 'ca-app-pub-5371284972684009~2684475411'
+      : 'ca-app-pub-5371284972684009~2684475411';
 
   static final String _bannerUnitId = Platform.isAndroid
-      ? 'ca-app-pub-7138758578654885/5541088522'
+      ? 'ca-app-pub-5371284972684009/2278362879'
       : 'ca-app-pub-7138758578654885/5541088522';
 
   /// Assign a listener.
@@ -54,9 +54,8 @@ class AppAds {
 //    "",
     _appId,
     bannerUnitId: _bannerUnitId,
-    keywords: <String>['baby', 'ABC', 'tap', 'alphabet', 'touch'],
+    keywords: <String>['baby', 'ABC', 'tap', 'alphabet', 'learn'],
     childDirected: true,
-    testing: true,
     anchorType: AnchorType.top,
     listener: _eventListener,
   );

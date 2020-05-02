@@ -92,7 +92,7 @@ class LettersState extends State<ABCTap> {
 
   Widget _buildBody() {
 
-    if (++adsCounter == 50) {
+    if (++adsCounter == 2) {
       adsCounter = 0;
       showAd();
     }

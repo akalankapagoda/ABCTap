@@ -1,40 +1,39 @@
 {
   "project_info": {
-    "project_number": "404380226527",
-    "firebase_url": "https://abc-tap.firebaseio.com",
-    "project_id": "abc-tap",
-    "storage_bucket": "abc-tap.appspot.com"
+    "project_number": "710557498176",
+    "firebase_url": "https://abc-tap-1c4a0.firebaseio.com",
+    "project_id": "abc-tap-1c4a0",
+    "storage_bucket": "abc-tap-1c4a0.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:404380226527:android:b97359adcb62990b1d6a6a",
+        "mobilesdk_app_id": "1:710557498176:android:b614a9e6be50aaa84698a5",
         "android_client_info": {
           "package_name": "com.dagger.abctap"
         }
       },
       "oauth_client": [
         {
-          "client_id": "404380226527-ak0ue1gv65ivivllfgpuh0iousjuem2t.apps.googleusercontent.com",
+          "client_id": "710557498176-ljqbmnr04u09eij1gs1pgj44regefte4.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyD63M2c_IfAgzXE2etIydYERjz5RHfgKW4"
+          "current_key": "AIzaSyA3eZo6aqh5B0j02-s7oMkoGGHp8U4TiaE"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "404380226527-ak0ue1gv65ivivllfgpuh0iousjuem2t.apps.googleusercontent.com",
+              "client_id": "710557498176-ljqbmnr04u09eij1gs1pgj44regefte4.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
         }
-      },
-      "admob_app_id": "ca-app-pub-7138758578654885~6020628347"
+      }
     }
   ],
   "configuration_version": "1"
