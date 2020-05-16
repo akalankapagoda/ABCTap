@@ -56,6 +56,7 @@ class AppAds {
     bannerUnitId: _bannerUnitId,
     keywords: <String>['baby', 'ABC', 'tap', 'alphabet', 'learn'],
     childDirected: true,
+//    testing: true,
     anchorType: AnchorType.top,
     listener: _eventListener,
   );

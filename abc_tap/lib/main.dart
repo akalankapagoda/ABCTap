@@ -13,17 +13,24 @@ import 'package:pimp_my_button/pimp_my_button.dart';
 import 'package:abctap/AppAds.dart';
 import 'package:abctap/bubbles.dart';
 import 'package:confetti/confetti.dart';
+import 'package:wakelock/wakelock.dart';
 
-void main() => runApp(ABCTap());
+void main() => runApp(Main());
+
+class Main extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        title: 'ABC Tap', debugShowCheckedModeBanner: false, home: ABCTap());
+  }
+}
 
 class ABCTap extends StatefulWidget {
-
   @override
   LettersState createState() => LettersState();
+}
 
-  }
-
-class LettersState extends State<ABCTap> {
+class LettersState extends State<ABCTap> with WidgetsBindingObserver {
   final _ads = AppAds.init();
   final _suggestions = [
     "A",
@@ -75,37 +82,55 @@ class LettersState extends State<ABCTap> {
     "audio/Video-Game-Secret-Sound-A2.mp3",
     "audio/Video-Game-Secret-Sound-C1.mp3"
   ];
+
+  final Map<String, bool> animalSound = {
+    "C": true,
+    "D": true,
+    "L": true,
+    "S": true
+  };
+
   int letterIndex = 0;
   int colorIndex = 0;
   int soundIndex = 0;
   Offset tapPosition = Offset.zero;
-  ConfettiController confettiController = new ConfettiController(duration: Duration(milliseconds: 500));
+  ConfettiController confettiController =
+      new ConfettiController(duration: Duration(milliseconds: 500));
   bool bubblesVisible = false;
+  bool autoPlay = false;
   int adsCounter = 0;
+  bool addAdditionalPlayDelay = false;
 
+  Offset center;
+
+  AudioPlayer backgroundMusicPlayer;
+
+  AudioCache letterChangeSoundPlayer;
 
   @override
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIOverlays([]); // Make it fullscreen
-}
+    WidgetsBinding.instance.addObserver(this);
+    letterChangeSoundPlayer = new AudioCache(fixedPlayer: new AudioPlayer());
+    loopSound("audio/music/cheeky_monkey_fun_app_playful_cheeky.mp3");
+    playLetterSound();
+  }
 
   Widget _buildBody() {
-
-    if (++adsCounter == 2) {
+    if (++adsCounter == 50) {
       adsCounter = 0;
       showAd();
     }
 
     return InkWell(
-      child: _buildTile(),
-      onLongPress: () {
-        changeLetter(tapPosition);
-      },
-      onTapDown: (TapDownDetails details) {
-        changeLetter(details.localPosition);
-      }
-    );
+        child: _buildTile(),
+        onLongPress: () {
+          changeLetter(tapPosition);
+        },
+        onTapDown: (TapDownDetails details) {
+          changeLetter(details.localPosition);
+        });
   }
 
   void showAd() {
@@ -113,12 +138,19 @@ class LettersState extends State<ABCTap> {
 
     Future.delayed(const Duration(seconds: 15), () {
       AppAds.hideBanner();
-
     });
   }
 
   void changeLetter(Offset localPosition) {
     confettiController.play();
+
+    if (autoPlay == true) {
+      addAdditionalPlayDelay = true;
+    }
+    forward(localPosition);
+  }
+
+  void forward(Offset localPosition) {
     if (++letterIndex > 25) {
       letterIndex = 0;
     }
@@ -134,10 +166,44 @@ class LettersState extends State<ABCTap> {
     tapPosition = localPosition;
 
     setState(() => {}); // What the hell???
+
+    playLetterSound();
+  }
+
+  Offset getCenter() {
+    if (center == null) {
+      center = Offset(MediaQuery.of(context).size.width / 2, MediaQuery.of(context).size.height / 2);
+    }
+
+    return center;
+  }
+
+  void reverse() {
+
+    if (autoPlay == true) {
+      addAdditionalPlayDelay = true;
+    }
+
+    tapPosition = getCenter();
+
+    if (--letterIndex < 0) {
+      letterIndex = 25;
+    }
+
+    if (++colorIndex > _colors.length - 1) {
+      colorIndex = 0;
+    }
+
+    if (++soundIndex > _sounds.length - 1) {
+      soundIndex = 0;
+    }
+
+    setState(() => {});
+
+    playLetterSound();
   }
 
   Widget _buildTile() {
-    playSound(_sounds[soundIndex]);
 
     String imageURL = "assets/alphabet/" + _suggestions[letterIndex] + ".png";
     return GridTile(
@@ -204,7 +270,7 @@ class LettersState extends State<ABCTap> {
           ),
           Positioned(
             child: Container(
-              child :ConfettiWidget(
+                child: ConfettiWidget(
               confettiController: confettiController,
               blastDirectionality: BlastDirectionality.explosive,
               shouldLoop: false,
@@ -218,8 +284,7 @@ class LettersState extends State<ABCTap> {
                 Colors.orange,
                 Colors.purple
               ], // manually specify the colors to be used
-            )
-            ),
+            )),
             left: tapPosition.dx,
             top: tapPosition.dy,
           ),
@@ -231,17 +296,66 @@ class LettersState extends State<ABCTap> {
 
   Widget getBubbles() {
     if (bubblesVisible) {
-      return Bubbles(
-          colors: _colors
-      );
+      return Bubbles(colors: _colors);
     } else {
       return Container();
     }
   }
 
   void toggleBubbles() {
+
+    if (bubblesVisible) {
+      playSound("audio/bubbles_pause.mp3");
+    } else {
+      playSound("audio/bubbles_play.mp3");
+    }
+
     bubblesVisible = !bubblesVisible;
+
     setState(() {});
+  }
+  
+  void toggleAutoPlay() {
+
+    if (autoPlay) {
+      playSound("audio/button_click_fast.mp3");
+    } else {
+      playSound("audio/button_click_fast.mp3");
+    }
+
+    autoPlay = !autoPlay;
+    setState(() {});
+
+    if (autoPlay) {
+      Wakelock.enable();
+      autoForward();
+    } else {
+      Wakelock.disable();
+    }
+  }
+
+  void autoForward() {
+    if (addAdditionalPlayDelay == true) {
+      addAdditionalPlayDelay = false;
+      // Avoid forwarding so we go two rounds
+    } else {
+      forward(getCenter());
+    }
+
+
+    int delay = 3500;
+
+
+    Future.delayed(Duration(milliseconds: delay), () {
+      if (autoPlay) {
+        autoForward();
+      }
+    });
+  }
+
+  void playLetterSound() async {
+    playSound(_sounds[soundIndex]);
+    await letterChangeSoundPlayer.play("audio/voice/" + _suggestions[letterIndex] + ".mp3");
   }
 
   Future<AudioPlayer> playSound(String sound) async {
@@ -249,30 +363,185 @@ class LettersState extends State<ABCTap> {
     return await cache.play(sound);
   }
 
-  Icon getFloatingButtonIcon() {
-    if (bubblesVisible) {
+  void loopSound(String sound) async {
+    AudioCache cache = new AudioCache();
+    backgroundMusicPlayer = await cache.loop(sound, volume: 0.8);
+  }
+
+  Icon getPlayButtonIcon() {
+    if (autoPlay) {
       return Icon(Icons.pause);
     } else {
       return Icon(Icons.play_arrow);
     }
   }
 
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch(state) {
+      case AppLifecycleState.detached :
+        pauseEverything();
+        break;
+      case AppLifecycleState.inactive :
+        break;
+      case AppLifecycleState.paused :
+        pauseEverything();
+        break;
+      case AppLifecycleState.resumed :
+        resumeEverything();
+        break;
+    }
+  }
+
+//
+//  @override
+//  Future<bool> didPopRoute() {
+//    pauseEverything();
+//  }
+
+  void pauseEverything() {
+    backgroundMusicPlayer?.pause();
+
+    if(autoPlay) {
+      autoPlay = false;
+    }
+
+    setState(() {});
+  }
+
+  void resumeEverything() {
+    backgroundMusicPlayer?.resume();
+
+    setState(() {});
+  }
+
+  void popApp() {
+    pauseEverything();
+    Navigator.of(context).pop(true);
+  }
+
+  Future<bool> onBackButtonPressed() {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) {
+        Future.delayed(Duration(seconds: 5), () {
+          Navigator.of(context).pop(false);
+        });
+
+        return new AlertDialog(
+          title: new Text('Are you sure?', style: TextStyle(fontSize: 28, color: Colors.white),),
+          content: new Text('Do you want to exit ABC Tap?', style: TextStyle(fontSize: 20, color: Colors.white),),
+          backgroundColor: _colors[colorIndex],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          actions: <Widget>[
+            RaisedButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              color: Colors.transparent,
+              child: Text('No', style: TextStyle(fontSize: 20, color: Colors.white)),
+            ),
+            RaisedButton(
+              onPressed: popApp,
+              color: Colors.transparent,
+              child: Text('Yes', style: TextStyle(fontSize: 20, color: Colors.white)),
+            )
+          ],
+        );
+      }
+    );
+  }
+
+  Widget getAnimalSoundButton() {
+    bool soundPresent = animalSound[_suggestions[letterIndex]];
+
+    if (soundPresent != null && soundPresent) {
+      return Row(
+        children: <Widget>[
+          Spacer(
+            flex: 15,
+          ),
+          FloatingActionButton(
+            backgroundColor: _colors[colorIndex],
+            onPressed: playAnimalSound,
+            child: Icon(Icons.volume_up)),
+          Spacer(
+            flex: 1,
+          ),
+        ],
+      );
+    } else {
+      return Row();
+    }
+  }
+
+  void playAnimalSound() async {
+    await letterChangeSoundPlayer.play("audio/animals/" + _suggestions[letterIndex] + ".mp3");
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'ABC Tap',
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: _buildBody(),
-        resizeToAvoidBottomPadding: false,
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: _colors[colorIndex],
-//          mini: true,
-          onPressed: toggleBubbles,
-          child: getFloatingButtonIcon()
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      ),
-    );
+    return WillPopScope(
+        onWillPop: onBackButtonPressed,
+        child: Scaffold(
+          body: _buildBody(),
+          resizeToAvoidBottomPadding: false,
+          floatingActionButton: Container(
+            child: Column (
+              verticalDirection: VerticalDirection.up,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    Spacer(
+                      flex: 2,
+                    ),
+                    FloatingActionButton(
+                        backgroundColor: _colors[colorIndex],
+                        onPressed: reverse,
+                        child: Icon(Icons.arrow_back_ios)),
+                    Spacer(
+                      flex: 1,
+                    ),
+                    FloatingActionButton(
+                        backgroundColor: _colors[colorIndex],
+                        onPressed: toggleAutoPlay,
+                        child: getPlayButtonIcon()),
+                    Spacer(
+                      flex: 1,
+                    ),
+                    FloatingActionButton(
+                        backgroundColor: _colors[colorIndex],
+                        onPressed: toggleBubbles,
+                        child: Icon(Icons.grain)),
+                    Spacer(
+                      flex: 2,
+                    ),
+                    //add right Widget here with padding right
+                  ],
+                ),
+                Row(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.all(20.0),
+                    )
+                  ],
+                ),
+                getAnimalSoundButton()
+              ],
+            )
+
+
+          ),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerFloat,
+        ));
+  }
+
+  @override
+  void dispose() {
+    backgroundMusicPlayer?.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 }
