@@ -86,7 +86,11 @@ class LettersState extends State<ABCTap> with WidgetsBindingObserver {
   final Map<String, bool> animalSound = {
     "C": true,
     "D": true,
+    "E": true,
+    "F": true,
     "L": true,
+    "M": true,
+    "P": true,
     "S": true
   };
 
